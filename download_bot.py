@@ -1,21 +1,22 @@
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
+from telegram import Update
+from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes
 import yt_dlp as youtube_dl
 import requests
 import os
 
 # Nhập mã token của bot
-TOKEN = '7380021997:AAG6-X6Ey32BmH9KnnQ2ie8PFUk_BiS4GEg'
+TOKEN = 'YOUR_TELEGRAM_BOT_TOKEN'
 
 # Hàm khởi tạo bot
-def start(update, context):
-    update.message.reply_text('HÍ ANH EM! Gửi cho TRẠNG link video từ Facebook, TikTok, hoặc YouTube để TRẠNG tải xuống cho bạn nha.')
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text('HÍ ANH EM! Gửi cho TRẠNG link video từ Facebook, TikTok, hoặc YouTube để TRẠNG tải xuống giúp nhé.')
 
 # Hàm xử lý link video
-def download_video(update, context):
+async def download_video(update: Update, context: ContextTypes.DEFAULT_TYPE):
     url = update.message.text
     chat_id = update.message.chat_id
 
-    update.message.reply_text('Đang tải video, anh em vui lòng đợi, vì lí do máy chủ chạy bot hơi cùi nên có thể video nặng sẽ báo lỗi nhé!...')
+    await update.message.reply_text('Đang tải video, AE vui lòng đợi, vì máy chủ chạy bot cấu hình basic nên video nặng sẽ báo lỗi nhé!...')
 
     try:
         # Tạo một thư mục tạm thời để lưu video
@@ -33,24 +34,24 @@ def download_video(update, context):
 
         # Gửi video cho người dùng
         with open(os.path.join('downloads', video_file), 'rb') as video:
-            context.bot.send_video(chat_id=chat_id, video=video)
+            await context.bot.send_video(chat_id=chat_id, video=video)
 
         # Xóa video sau khi gửi
         os.remove(os.path.join('downloads', video_file))
 
     except Exception as e:
-        update.message.reply_text('Có lỗi xảy ra khi tải video: {}'.format(str(e)))
+        await update.message.reply_text('Có lỗi xảy ra khi tải video: {}'.format(str(e)))
 
 def main():
-    updater = Updater(TOKEN, use_context=True)
-    dp = updater.dispatcher
+    application = ApplicationBuilder().token(TOKEN).build()
 
-    dp.add_handler(CommandHandler('start', start))
-    dp.add_handler(MessageHandler(Filters.text & ~Filters.command, download_video))
+    start_handler = CommandHandler('start', start)
+    download_handler = MessageHandler(filters.TEXT & ~filters.COMMAND, download_video)
 
-    updater.start_polling()
-    updater.idle()
+    application.add_handler(start_handler)
+    application.add_handler(download_handler)
+
+    application.run_polling()
 
 if __name__ == '__main__':
     main()
-
