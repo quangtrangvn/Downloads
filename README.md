@@ -13,3 +13,7 @@
      ```bash
      sudo apt-get install python3 python3-pip
      ```
+   - **Lệnh**:
+     ```bash
+     pip install python-telegram-bot youtube-dl requests
+     ```
